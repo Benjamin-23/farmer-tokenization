@@ -105,7 +105,7 @@ class CurrencyConverter {
     // Convert to USD first
     const usdAmount = amount * exchangeRate.rate
 
-    const hbarAmount = usdAmount / this.hederaRate.hbarToUsd
+    const hbarAmount = usdAmount * this.hederaRate.hbarToUsd
 
     const tokenAmount = Math.floor(hbarAmount * 10000) / 10000 // 4 decimal precision for HBAR
 

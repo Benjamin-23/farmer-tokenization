@@ -10,6 +10,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { ValidationReport } from "@/components/validation-report"
 import { Upload, FileText, CheckCircle, XCircle, Loader2 } from "lucide-react"
 import { receiptValidator, type ValidationResult } from "@/lib/receipt-validator"
+// import {PDFExtract, PDFExtractOptions} from 'pdf.js-extract';
+
 
 interface ParsedReceipt {
   amount: number
@@ -71,7 +73,10 @@ export function PDFUpload({ onReceiptParsed }: PDFUploadProps) {
             return prev + 10
           })
         }, 200)
-
+        // const pdfExtract = new PDFExtract();
+        // const options: PDFExtractOptions = {};
+        // const extractedData = await pdfExtract.extract(file.name, options);
+        // console.log(extractedData, 'extracted data');
         const parsed = await simulatePDFParsing(file)
 
         setUploadProgress(80)

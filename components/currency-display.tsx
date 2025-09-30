@@ -122,7 +122,7 @@ export function CurrencyDisplay({ amount, currency, onConversionUpdate }: Curren
             </div>
             <div className="text-sm text-muted-foreground">Token supply to be minted (1:1 with HBAR value)</div>
             <div className="text-xs text-muted-foreground mt-1">
-              Formula: ${conversion.usdAmount.toFixed(2)} ÷ ${conversion.hbarRate.toFixed(4)} ={" "}
+              Formula: ${conversion.usdAmount.toFixed(2)} * ${conversion.hbarRate.toFixed(4)} ={" "}
               {conversion.tokenAmount.toFixed(4)} HBAR
             </div>
           </div>

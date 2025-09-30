@@ -6,6 +6,7 @@ import { WalletConnector } from "@/components/wallet-connector"
 import { useWallet } from "@/hooks/use-wallet"
 import { Wheat, Upload, Coins, TrendingUp, Shield, Zap, FileText, Users, ArrowRight } from "lucide-react"
 import Link from "next/link"
+import { motion } from "framer-motion"
 
 export default function HomePage() {
   const { isConnected, walletType, address, connectWallet } = useWallet()
@@ -35,13 +36,13 @@ export default function HomePage() {
             </div>
             <div className="flex items-center gap-4">
               <nav className="hidden md:flex items-center gap-6">
-                <a href="#dashboard" className="text-sm font-medium hover:text-primary transition-colors">
+                <a href="dashboard" className="text-sm font-medium hover:text-primary transition-colors">
                   Dashboard
                 </a>
-                <a href="#marketplace" className="text-sm font-medium hover:text-primary transition-colors">
+                <a href="marketplace" className="text-sm font-medium hover:text-primary transition-colors">
                   Marketplace
                 </a>
-                <a href="#about" className="text-sm font-medium hover:text-primary transition-colors">
+                <a href="about" className="text-sm font-medium hover:text-primary transition-colors">
                   About
                 </a>
               </nav>
@@ -56,38 +57,45 @@ export default function HomePage() {
       </header>
 
       {/* Hero Section */}
-      <section className="py-20 px-4">
+      <motion.section
+        className="py-20 px-4"
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
+      >
         <div className="container mx-auto text-center">
-          <Badge variant="secondary" className="mb-4">
-            Powered by Hedera Network
-          </Badge>
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 text-balance">
-            Tokenize Your Farm
-            <span className="text-primary"> Payment Receipts</span>
-          </h1>
-          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto text-pretty">
-            Transform your agricultural payment receipts into tradeable tokens on the Hedera blockchain. Secure,
-            transparent, and efficient farming finance.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="gap-2" asChild>
-              <Link href="/upload">
-                <Upload className="h-5 w-5" />
-                Upload Receipt
-              </Link>
-            </Button>
-            <Button size="lg" variant="outline" className="gap-2 bg-transparent" asChild>
-              <Link href="/marketplace">
-                <TrendingUp className="h-5 w-5" />
-                View Marketplace
-              </Link>
-            </Button>
-          </div>
+          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2, duration: 0.7 }}>
+            <Badge variant="secondary" className="mb-4">
+              Powered by Hedera Network
+            </Badge>
+            <h1 className="text-4xl md:text-6xl font-bold mb-6 text-balance">
+              Tokenize Your Farm
+              <span className="text-primary"> Payment Receipts</span>
+            </h1>
+            <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto text-pretty">
+              Transform your agricultural payment receipts into tradeable tokens on the Hedera blockchain. Secure,
+              transparent, and efficient farming finance.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button size="lg" className="gap-2" asChild>
+                <Link href="/upload">
+                  <Upload className="h-5 w-5" />
+                  Upload Receipt
+                </Link>
+              </Button>
+              <Button size="lg" variant="outline" className="gap-2 bg-transparent" asChild>
+                <Link href="/marketplace">
+                  <TrendingUp className="h-5 w-5" />
+                  View Marketplace
+                </Link>
+              </Button>
+            </div>
+          </motion.div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Features Grid */}
-      <section className="py-16 px-4 bg-muted/30">
+      <motion.section className="py-16 px-4 bg-muted/30">
         <div className="container mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">How It Works</h2>
@@ -96,89 +104,82 @@ export default function HomePage() {
             </p>
           </div>
           <div className="grid md:grid-cols-3 gap-8">
-            <Card>
-              <CardHeader>
-                <div className="p-3 bg-primary/10 rounded-lg w-fit">
-                  <FileText className="h-6 w-6 text-primary" />
-                </div>
-                <CardTitle>Upload Receipt</CardTitle>
-                <CardDescription>
-                  Upload your payment receipt PDF. Our system validates authenticity and extracts payment details.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="text-sm text-muted-foreground space-y-2">
-                  <li>• PDF validation & parsing</li>
-                  <li>• Date verification (within 24h)</li>
-                  <li>• Amount extraction</li>
-                </ul>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <div className="p-3 bg-primary/10 rounded-lg w-fit">
-                  <Coins className="h-6 w-6 text-primary" />
-                </div>
-                <CardTitle>Token Creation</CardTitle>
-                <CardDescription>
-                  Automatic token generation based on payment value, converted to HBAR equivalent on Hedera network.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="text-sm text-muted-foreground space-y-2">
-                  <li>• Currency conversion</li>
-                  <li>• HBAR value calculation</li>
-                  <li>• HTS token minting</li>
-                </ul>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <div className="p-3 bg-primary/10 rounded-lg w-fit">
-                  <Users className="h-6 w-6 text-primary" />
-                </div>
-                <CardTitle>Trade & Sell</CardTitle>
-                <CardDescription>
-                  List your tokens on our marketplace for buyers to purchase, creating liquidity for your farm payments.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="text-sm text-muted-foreground space-y-2">
-                  <li>• Marketplace listing</li>
-                  <li>• Secure transactions</li>
-                  <li>• Instant settlements</li>
-                </ul>
-              </CardContent>
-            </Card>
+            {[{
+              icon: <FileText className="h-6 w-6 text-primary" />,
+              title: "Upload Receipt",
+              desc: "Upload your payment receipt PDF. Our system validates authenticity and extracts payment details.",
+              items: ["PDF validation & parsing", "Date verification (within 24h)", "Amount extraction"]
+            }, {
+              icon: <Coins className="h-6 w-6 text-primary" />,
+              title: "Token Creation",
+              desc: "Automatic token generation based on payment value, converted to HBAR equivalent on Hedera network.",
+              items: ["Currency conversion", "HBAR value calculation", "HTS token minting"]
+            }, {
+              icon: <Users className="h-6 w-6 text-primary" />,
+              title: "Trade & Sell",
+              desc: "List your tokens on our marketplace for buyers to purchase, creating liquidity for your farm payments.",
+              items: ["Marketplace listing", "Secure transactions", "Instant settlements"]
+            }].map((feature, i) => (
+              <motion.div
+                key={feature.title}
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.5 }}
+                transition={{ duration: 0.7, delay: i * 0.2 }}
+              >
+                <Card>
+                  <CardHeader>
+                    <div className="p-3 bg-primary/10 rounded-lg w-fit">
+                      {feature.icon}
+                    </div>
+                    <CardTitle>{feature.title}</CardTitle>
+                    <CardDescription>{feature.desc}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="text-sm text-muted-foreground space-y-2">
+                      {feature.items.map((item) => (
+                        <li key={item}>• {item}</li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Stats Section */}
-      <section className="py-16 px-4">
+      <motion.section className="py-16 px-4">
         <div className="container mx-auto">
           <div className="grid md:grid-cols-4 gap-8 text-center">
-            <div>
-              <div className="text-3xl font-bold text-primary mb-2">$2.5M+</div>
-              <div className="text-muted-foreground">Receipts Tokenized</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-primary mb-2">1,200+</div>
-              <div className="text-muted-foreground">Active Farmers</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-primary mb-2">5,800+</div>
-              <div className="text-muted-foreground">Tokens Created</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-primary mb-2">99.9%</div>
-              <div className="text-muted-foreground">Uptime</div>
-            </div>
+            {[{
+              value: "$2.5M+",
+              label: "Receipts Tokenized"
+            }, {
+              value: "1,200+",
+              label: "Active Farmers"
+            }, {
+              value: "5,800+",
+              label: "Tokens Created"
+            }, {
+              value: "99.9%",
+              label: "Uptime"
+            }].map((stat, i) => (
+              <motion.div
+                key={stat.label}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.7 }}
+                transition={{ duration: 0.6, delay: i * 0.15 }}
+              >
+                <div className="text-3xl font-bold text-primary mb-2">{stat.value}</div>
+                <div className="text-muted-foreground">{stat.label}</div>
+              </motion.div>
+            ))}
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Coming Soon Section */}
       <section className="py-16 px-4 bg-muted/30">
@@ -227,7 +228,13 @@ export default function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-4">
+      <motion.section
+        className="py-20 px-4"
+        initial={{ opacity: 0, scale: 0.95 }}
+        whileInView={{ opacity: 1, scale: 1 }}
+        viewport={{ once: true, amount: 0.7 }}
+        transition={{ duration: 0.7 }}
+      >
         <div className="container mx-auto text-center">
           <h2 className="text-3xl font-bold mb-4">Ready to Get Started?</h2>
           <p className="text-muted-foreground mb-8 max-w-2xl mx-auto">
@@ -240,15 +247,17 @@ export default function HomePage() {
               connectedWallet={walletType || undefined}
             />
           ) : (
-            <Button size="lg" className="gap-2" asChild>
-              <Link href="/dashboard">
-                Go to Dashboard
-                <ArrowRight className="h-5 w-5" />
-              </Link>
-            </Button>
+            <motion.div whileHover={{ scale: 1.05 }}>
+              <Button size="lg" className="gap-2" asChild>
+                <Link href="/dashboard">
+                  Go to Dashboard
+                  <ArrowRight className="h-5 w-5" />
+                </Link>
+              </Button>
+            </motion.div>
           )}
         </div>
-      </section>
+      </motion.section>
 
       {/* Footer */}
       <footer className="border-t bg-card/50 py-12 px-4">
@@ -327,7 +336,7 @@ export default function HomePage() {
             </div>
           </div>
           <div className="border-t mt-8 pt-8 text-center text-sm text-muted-foreground">
-            <p>&copy; 2024 AgriToken. All rights reserved. Built on Hedera Network.</p>
+            <p>&copy; {new Date().getFullYear()} AgriToken. All rights reserved. Built on Hedera Network.</p>
           </div>
         </div>
       </footer>

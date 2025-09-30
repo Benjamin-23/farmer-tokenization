@@ -1,30 +1,27 @@
-# Farmer tokenization webapp
+AgriToken - Farmer Receipt Tokenization Platform
+Overview
+AgriToken is a decentralized web application that enables farmers to tokenize their payment receipts on the Hedera network. The platform converts verified payment receipts into digital tokens that can be traded in a marketplace, providing farmers with improved liquidity and access to global buyers.
 
-*Automatically synced with your [v0.app](https://v0.app) deployments*
+Features
+PDF Receipt Processing: Upload and extract payment details from PDF receipts
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/basilicas-projects/v0-farmer-tokenization-webapp)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.app-black?style=for-the-badge)](https://v0.app/chat/projects/gDw118mPb6F)
+Hedera Tokenization: Convert verified payment amounts into HBAR-based tokens
 
-## Overview
+Wallet Integration: Support for HashPack and MetaMask wallets
 
-This repository will stay in sync with your deployed chats on [v0.app](https://v0.app).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.app](https://v0.app).
+Marketplace: Platform for buyers to purchase farmer-created tokens
 
-## Deployment
+Receipt Validation: Ensures receipts are current (within 24 hours) and contain valid payment information
 
-Your project is live at:
+How It Works
+Farmers upload payment receipt PDFs
 
-**[https://vercel.com/basilicas-projects/v0-farmer-tokenization-webapp](https://vercel.com/basilicas-projects/v0-farmer-tokenization-webapp)**
+The system extracts and verifies payment details (amount, currency, date)
 
-## Build your app
+Payment value is converted to USD equivalent
 
-Continue building your app on:
+Token value is calculated: USD Value / Current HBAR Price
 
-**[https://v0.app/chat/projects/gDw118mPb6F](https://v0.app/chat/projects/gDw118mPb6F)**
+Tokens are minted on the Hedera network
 
-## How It Works
-
-1. Create and modify your project using [v0.app](https://v0.app)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+Tokens are listed in the marketplace for buyers to purchase

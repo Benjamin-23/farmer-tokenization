@@ -70,7 +70,7 @@ export default function MarketplacePage() {
           currency: "USD",
           seller: `0.0.${100000 + index}`,
           listedAt: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
-          status: Math.random() > 0.2 ? "active" : "sold",
+          status: (Math.random() > 0.2 ? "active" : "sold") as "active" | "sold" | "pending",
           rating: 4 + Math.random(),
           location: ["Iowa", "Nebraska", "Kansas", "Illinois", "Indiana"][Math.floor(Math.random() * 5)],
         })),
@@ -402,7 +402,7 @@ export default function MarketplacePage() {
                           <div className="text-right">
                             <div className="text-xl font-bold text-primary">${listing.price.toLocaleString()}</div>
                             <div className="text-xs text-muted-foreground">
-                              {(listing.token.supply / 100).toFixed(2)} tokens
+                              {(listing.token.supply / 10000).toFixed(2)} tokens
                             </div>
                           </div>
                         </div>
@@ -469,7 +469,7 @@ export default function MarketplacePage() {
                         <div className="text-right">
                           <div className="text-2xl font-bold text-primary mb-1">${listing.price.toLocaleString()}</div>
                           <div className="text-sm text-muted-foreground mb-3">
-                            {(listing.token.supply / 100).toFixed(2)} tokens
+                            {(listing.token.supply / 10000).toFixed(2)} tokens
                           </div>
                           <Button size="sm" className="gap-2" disabled={listing.status !== "active" || !isConnected}>
                             <ShoppingCart className="h-4 w-4" />
