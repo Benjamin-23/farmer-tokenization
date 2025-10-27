@@ -11,7 +11,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Wallet, Shield, Zap, RefreshCw } from "lucide-react"
+import { Wallet, Shield, Zap, RefreshCw, LogOut } from "lucide-react"
 import { useWallet } from "@/hooks/use-wallet"
 
 interface WalletConnectorProps {
@@ -22,12 +22,27 @@ interface WalletConnectorProps {
 
 export function WalletConnector({ onWalletConnect, isConnected, connectedWallet }: WalletConnectorProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const { walletType, balance, address, connectWallet, refreshBalance } = useWallet()
+  const { walletType, balance, address, connectWallet, refreshBalance, disconnectWallet, isInitialized } = useWallet()
 
   const handleWalletSelect = async (walletType: "hashpack" | "metamask") => {
     await connectWallet(walletType)
     onWalletConnect(walletType)
     setIsOpen(false)
+  }
+
+  const handleDisconnect = () => {
+    disconnectWallet()
+    onWalletConnect("hashpack") // Reset parent state
+  }
+
+  // Show loading state while initializing
+  if (!isInitialized) {
+    return (
+      <Button variant="outline" disabled className="gap-2">
+        <Wallet className="h-4 w-4" />
+        Loading...
+      </Button>
+    )
   }
 
   if (isConnected) {
@@ -47,10 +62,20 @@ export function WalletConnector({ onWalletConnect, isConnected, connectedWallet 
               size="sm" 
               onClick={refreshBalance}
               className="p-2"
+              title="Refresh Balance"
             >
               <RefreshCw className="h-4 w-4" />
             </Button>
           )}
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleDisconnect}
+            className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+            title="Disconnect Wallet"
+          >
+            <LogOut className="h-4 w-4" />
+          </Button>
           <Button variant="outline" className="gap-2 bg-transparent">
             <Wallet className="h-4 w-4" />
             Connected
