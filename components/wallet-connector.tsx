@@ -11,7 +11,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Wallet, Shield, Zap } from "lucide-react"
+import { Wallet, Shield, Zap, RefreshCw } from "lucide-react"
+import { useWallet } from "@/hooks/use-wallet"
 
 interface WalletConnectorProps {
   onWalletConnect: (walletType: "hashpack" | "metamask") => void
@@ -21,18 +22,41 @@ interface WalletConnectorProps {
 
 export function WalletConnector({ onWalletConnect, isConnected, connectedWallet }: WalletConnectorProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const { walletType, balance, address, connectWallet, refreshBalance } = useWallet()
 
-  const handleWalletSelect = (walletType: "hashpack" | "metamask") => {
+  const handleWalletSelect = async (walletType: "hashpack" | "metamask") => {
+    await connectWallet(walletType)
     onWalletConnect(walletType)
     setIsOpen(false)
   }
 
   if (isConnected) {
     return (
-      <Button variant="outline" className="gap-2 bg-transparent">
-        <Wallet className="h-4 w-4" />
-        Connected: {connectedWallet}
-      </Button>
+      <div className="flex items-center gap-3">
+        <div className="text-right">
+          <div className="text-sm font-medium">{connectedWallet}</div>
+          <div className="text-xs text-muted-foreground">
+            {address && address.length > 10 ? `${address.slice(0, 6)}...${address.slice(-4)}` : address}
+          </div>
+          <div className="text-xs text-green-600 font-medium">{balance}</div>
+        </div>
+        <div className="flex gap-2">
+          {walletType === "metamask" && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={refreshBalance}
+              className="p-2"
+            >
+              <RefreshCw className="h-4 w-4" />
+            </Button>
+          )}
+          <Button variant="outline" className="gap-2 bg-transparent">
+            <Wallet className="h-4 w-4" />
+            Connected
+          </Button>
+        </div>
+      </div>
     )
   }
 
