@@ -119,6 +119,52 @@ export class HederaTokenClient {
     }
   }
 
+  // Token ownership tracking
+  async purchaseTokens(tokenId: string, buyerAddress: string, amount: number): Promise<string> {
+    try {
+      // Simulate token purchase
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+      
+      // Store ownership information
+      const ownershipKey = `ownership_${buyerAddress}`
+      const existingOwnership = localStorage.getItem(ownershipKey)
+      const ownership = existingOwnership ? JSON.parse(existingOwnership) : {}
+      
+      if (!ownership[tokenId]) {
+        ownership[tokenId] = 0
+      }
+      ownership[tokenId] += amount
+      
+      localStorage.setItem(ownershipKey, JSON.stringify(ownership))
+      
+      return this.generateTransactionId()
+    } catch (error) {
+      console.error("Token purchase failed:", error)
+      throw new Error("Failed to purchase tokens")
+    }
+  }
+
+  getUserTokens(userAddress: string): { tokenId: string; amount: number; token: CreatedToken }[] {
+    try {
+      const ownershipKey = `ownership_${userAddress}`
+      const ownership = localStorage.getItem(ownershipKey)
+      if (!ownership) return []
+      
+      const userOwnership = JSON.parse(ownership)
+      const allTokens = this.getAllTokens()
+      
+      return Object.entries(userOwnership)
+        .map(([tokenId, amount]) => {
+          const token = allTokens.find(t => t.tokenId === tokenId)
+          return token ? { tokenId, amount: amount as number, token } : null
+        })
+        .filter(Boolean) as { tokenId: string; amount: number; token: CreatedToken }[]
+    } catch (error) {
+      console.error("Failed to get user tokens:", error)
+      return []
+    }
+  }
+
   async associateToken(tokenId: string, accountId: string): Promise<string> {
     try {
       // Simulate token association

@@ -26,6 +26,7 @@ import Link from "next/link"
 export default function DashboardPage() {
   const { isConnected, walletType, address, connectWallet } = useWallet()
   const [tokens, setTokens] = useState<CreatedToken[]>([])
+  const [purchasedTokens, setPurchasedTokens] = useState<{ tokenId: string; amount: number; token: CreatedToken }[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [stats, setStats] = useState({
     totalTokens: 0,
@@ -43,9 +44,15 @@ export default function DashboardPage() {
   const loadDashboardData = async () => {
     setIsLoading(true)
     try {
-      // Load user's tokens
+      // Load user's created tokens
       const allTokens = hederaClient.getAllTokens()
       setTokens(allTokens)
+
+      // Load user's purchased tokens
+      if (address) {
+        const purchased = hederaClient.getUserTokens(address)
+        setPurchasedTokens(purchased)
+      }
 
       // Calculate stats
       const totalTokens = allTokens.length
@@ -241,8 +248,9 @@ export default function DashboardPage() {
 
           {/* Main Content */}
           <Tabs defaultValue="tokens" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="tokens">My Tokens</TabsTrigger>
+              <TabsTrigger value="purchased">Purchased</TabsTrigger>
               <TabsTrigger value="activity">Recent Activity</TabsTrigger>
               <TabsTrigger value="analytics">Analytics</TabsTrigger>
             </TabsList>
@@ -333,6 +341,95 @@ export default function DashboardPage() {
                           <Button variant="outline" size="sm" className="gap-2 bg-transparent">
                             <TrendingUp className="h-4 w-4" />
                             List on Marketplace
+                          </Button>
+                          <Button variant="outline" size="sm" className="gap-2 bg-transparent">
+                            <ExternalLink className="h-4 w-4" />
+                            View on Hedera
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="purchased" className="space-y-6">
+              {purchasedTokens.length === 0 ? (
+                <Card>
+                  <CardContent className="py-16 text-center">
+                    <ShoppingCart className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">No Purchased Tokens</h3>
+                    <p className="text-muted-foreground mb-6">
+                      You haven't purchased any tokens yet. Visit the marketplace to buy tokens from other farmers.
+                    </p>
+                    <Button asChild>
+                      <Link href="/marketplace">Browse Marketplace</Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid gap-6">
+                  {purchasedTokens.map((purchasedToken) => (
+                    <Card key={purchasedToken.tokenId}>
+                      <CardHeader>
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <CardTitle className="flex items-center gap-2">
+                              <ShoppingCart className="h-5 w-5 text-green-600" />
+                              {purchasedToken.token.name}
+                            </CardTitle>
+                            <CardDescription className="flex items-center gap-4 mt-2">
+                              <Badge variant="outline">{purchasedToken.token.symbol}</Badge>
+                              <span className="flex items-center gap-1">
+                                <Calendar className="h-3 w-3" />
+                                {formatDate(purchasedToken.token.createdAt)}
+                              </span>
+                            </CardDescription>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-lg font-bold text-green-600">
+                              {purchasedToken.amount} tokens
+                            </div>
+                            <div className="text-sm text-muted-foreground">
+                              {purchasedToken.token.receiptData.currency} {purchasedToken.token.receiptData.amount.toLocaleString()}
+                            </div>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <div>
+                            <h4 className="font-semibold mb-2">Token Details</h4>
+                            <div className="space-y-2 text-sm">
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Token ID:</span>
+                                <span className="font-mono text-xs">{purchasedToken.token.tokenId}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Total Supply:</span>
+                                <span>{(purchasedToken.token.supply / 100).toFixed(2)} tokens</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div>
+                            <h4 className="font-semibold mb-2">Receipt Info</h4>
+                            <div className="space-y-2 text-sm">
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Vendor:</span>
+                                <span>{purchasedToken.token.receiptData.vendor}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Date:</span>
+                                <span>{formatDate(purchasedToken.token.receiptData.date)}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex gap-3 pt-4 border-t">
+                          <Button variant="outline" size="sm" className="gap-2 bg-transparent">
+                            <TrendingUp className="h-4 w-4" />
+                            Sell Tokens
                           </Button>
                           <Button variant="outline" size="sm" className="gap-2 bg-transparent">
                             <ExternalLink className="h-4 w-4" />

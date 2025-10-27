@@ -8,8 +8,12 @@ import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { ValidationReport } from "@/components/validation-report"
-import { Upload, FileText, CheckCircle, XCircle, Loader2 } from "lucide-react"
+import { Upload, FileText, CheckCircle, XCircle, Loader2, Coins } from "lucide-react"
 import { receiptValidator, type ValidationResult } from "@/lib/receipt-validator"
+import { hederaClient, type TokenMetadata } from "@/lib/hedera-client"
+import { useWallet } from "@/hooks/use-wallet"
+import { toast } from "sonner"
+import { ethers } from "ethers"
 // import {PDFExtract, PDFExtractOptions} from 'pdf.js-extract';
 
 
@@ -29,10 +33,12 @@ interface PDFUploadProps {
 export function PDFUpload({ onReceiptParsed }: PDFUploadProps) {
   const [uploadProgress, setUploadProgress] = useState(0)
   const [isProcessing, setIsProcessing] = useState(false)
+  const [isCreatingToken, setIsCreatingToken] = useState(false)
   const [parsedReceipt, setParsedReceipt] = useState<ParsedReceipt | null>(null)
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null)
   const [authenticityResult, setAuthenticityResult] = useState<any>(null)
   const [error, setError] = useState<string | null>(null)
+  const { walletType, address, balance, walletData, refreshBalance } = useWallet()
 
   const simulatePDFParsing = async (file: File): Promise<ParsedReceipt> => {
     // Simulate PDF parsing with realistic data
@@ -42,13 +48,126 @@ export function PDFUpload({ onReceiptParsed }: PDFUploadProps) {
     const mockReceipt = {
       amount: Math.floor(Math.random() * 5000) + 100,
       currency: ["USD", "EUR", "GBP"][Math.floor(Math.random() * 3)],
-      date: new Date(Date.now() - Math.random() * 48 * 60 * 60 * 1000).toISOString(),
+      date: new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000).toISOString(), // Within 24 hours
       vendor: ["Farm Supply Co.", "Agricultural Equipment Ltd.", "Seed & Feed Store"][Math.floor(Math.random() * 3)],
-      isValid: false,
+      isValid: true, // Make it valid for testing
       validationErrors: [],
     }
 
     return mockReceipt
+  }
+
+  // Create token symbol from vendor name
+  const createTokenSymbol = (vendorName: string): string => {
+    // Remove common words and take first letters
+    const words = vendorName
+      .replace(/[^a-zA-Z\s]/g, '') // Remove special characters
+      .split(' ')
+      .filter(word => word.length > 2) // Filter out short words
+      .slice(0, 3) // Take first 3 words
+      .map(word => word.charAt(0).toUpperCase())
+      .join('')
+    
+    return words.length >= 2 ? words : vendorName.substring(0, 4).toUpperCase()
+  }
+
+  // Check if wallet has sufficient HBAR balance
+  const checkBalance = (): boolean => {
+    if (!balance) return false
+    const balanceNumber = parseFloat(balance.replace(' HBAR', ''))
+    return balanceNumber >= 8 // 3 HBAR for token creation + 5 HBAR for verification
+  }
+
+  // Deduct HBAR from wallet
+  const deductHBAR = async (amount: number): Promise<boolean> => {
+    try {
+      if (walletType === "metamask" && walletData) {
+        const provider = walletData[1]
+        const signer = await provider.getSigner()
+        
+        // Convert HBAR to wei (assuming 1 HBAR = 10^18 wei)
+        const amountInWei = ethers.parseEther(amount.toString())
+        
+        // Send transaction to deduct HBAR
+        const tx = await signer.sendTransaction({
+          to: "0x0000000000000000000000000000000000000000", // Burn address
+          value: amountInWei,
+          gasLimit: 21000,
+        })
+        
+        await tx.wait()
+        return true
+      }
+      return false
+    } catch (error) {
+      console.error("Failed to deduct HBAR:", error)
+      return false
+    }
+  }
+
+  // Create token from receipt
+  const createToken = async () => {
+    if (!parsedReceipt || !checkBalance()) {
+      toast.error("Insufficient HBAR balance. You need at least 8 HBAR (3 for token creation + 5 for verification)")
+      return
+    }
+
+    setIsCreatingToken(true)
+    
+    try {
+      // Deduct HBAR for token creation (3 HBAR)
+      toast.loading("Deducting 3 HBAR for token creation...")
+      const tokenCreationDeduction = await deductHBAR(3)
+      if (!tokenCreationDeduction) {
+        toast.error("Failed to deduct HBAR for token creation")
+        return
+      }
+
+      // Deduct HBAR for verification (5 HBAR)
+      toast.loading("Deducting 5 HBAR for receipt verification...")
+      const verificationDeduction = await deductHBAR(5)
+      if (!verificationDeduction) {
+        toast.error("Failed to deduct HBAR for verification")
+        return
+      }
+
+      // Create token metadata
+      const tokenSymbol = createTokenSymbol(parsedReceipt.vendor)
+      const tokenMetadata: TokenMetadata = {
+        name: `${parsedReceipt.vendor} Receipt Token`,
+        symbol: tokenSymbol,
+        decimals: 2,
+        initialSupply: parsedReceipt.amount * 100, // Convert to smallest unit
+        treasuryAccountId: address || "0.0.0",
+        receiptData: {
+          amount: parsedReceipt.amount,
+          currency: parsedReceipt.currency,
+          date: parsedReceipt.date,
+          vendor: parsedReceipt.vendor,
+          receiptHash: `0x${Math.random().toString(16).substr(2, 64)}`, // Mock hash
+        }
+      }
+
+      // Create token on Hedera
+      toast.loading("Creating token on Hedera network...")
+      const createdToken = await hederaClient.createToken(tokenMetadata)
+      
+      // Refresh wallet balance
+      await refreshBalance()
+      
+      toast.success(`Token created successfully! Token ID: ${createdToken.tokenId}`)
+      
+      // Reset form
+      setParsedReceipt(null)
+      setValidationResult(null)
+      setAuthenticityResult(null)
+      
+    } catch (error) {
+      console.error("Token creation failed:", error)
+      toast.error("Failed to create token. Please try again.")
+    } finally {
+      setIsCreatingToken(false)
+    }
   }
 
   const onDrop = useCallback(
@@ -230,8 +349,45 @@ export function PDFUpload({ onReceiptParsed }: PDFUploadProps) {
 
             {parsedReceipt.isValid && (
               <div className="pt-4 border-t">
-                <Button className="w-full" size="lg">
-                  Create Token from Receipt
+                <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Coins className="h-4 w-4 text-blue-600" />
+                    <span className="text-sm font-medium text-blue-900">Token Creation Cost</span>
+                  </div>
+                  <div className="text-sm text-blue-800">
+                    <div>• Token Creation: 3 HBAR</div>
+                    <div>• Receipt Verification: 5 HBAR</div>
+                    <div className="font-semibold mt-1">Total Required: 8 HBAR</div>
+                    <div className="text-xs mt-1">Current Balance: {balance || "0 HBAR"}</div>
+                  </div>
+                </div>
+                
+                {!checkBalance() && (
+                  <Alert variant="destructive" className="mb-4">
+                    <XCircle className="h-4 w-4" />
+                    <AlertDescription>
+                      Insufficient HBAR balance. You need at least 8 HBAR to create a token.
+                    </AlertDescription>
+                  </Alert>
+                )}
+                
+                <Button 
+                  className="w-full" 
+                  size="lg"
+                  onClick={createToken}
+                  disabled={!checkBalance() || isCreatingToken}
+                >
+                  {isCreatingToken ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Creating Token...
+                    </>
+                  ) : (
+                    <>
+                      <Coins className="h-4 w-4 mr-2" />
+                      Create Token from Receipt
+                    </>
+                  )}
                 </Button>
               </div>
             )}

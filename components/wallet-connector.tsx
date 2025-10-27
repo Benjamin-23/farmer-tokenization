@@ -49,7 +49,7 @@ export function WalletConnector({ onWalletConnect, isConnected, connectedWallet 
     return (
       <div className="flex items-center gap-3">
         <div className="text-right">
-          <div className="text-sm font-medium">{connectedWallet}</div>
+          {/* <div className="text-sm font-medium">{connectedWallet}</div> */}
           <div className="text-xs text-muted-foreground">
             {address && address.length > 10 ? `${address.slice(0, 6)}...${address.slice(-4)}` : address}
           </div>
@@ -75,10 +75,6 @@ export function WalletConnector({ onWalletConnect, isConnected, connectedWallet 
             title="Disconnect Wallet"
           >
             <LogOut className="h-4 w-4" />
-          </Button>
-          <Button variant="outline" className="gap-2 bg-transparent">
-            <Wallet className="h-4 w-4" />
-            Connected
           </Button>
         </div>
       </div>

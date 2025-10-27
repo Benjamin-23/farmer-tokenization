@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { WalletConnector } from "@/components/wallet-connector"
+import { TokenPurchaseDialog } from "@/components/TokenPurchaseDialog"
 import { useWallet } from "@/hooks/use-wallet"
 import { hederaClient, type CreatedToken } from "@/lib/hedera-client"
 import {
@@ -435,10 +436,13 @@ export default function MarketplacePage() {
                           </div>
                         </div>
 
-                        <Button className="w-full gap-2" disabled={listing.status !== "active" || !isConnected}>
-                          <ShoppingCart className="h-4 w-4" />
-                          {listing.status === "active" ? "Buy Token" : "Sold"}
-                        </Button>
+                        <TokenPurchaseDialog 
+                          listing={listing}
+                          onPurchaseComplete={() => {
+                            // Refresh marketplace data after purchase
+                            loadMarketplaceData()
+                          }}
+                        />
                       </CardContent>
                     </Card>
                   ))}
@@ -471,10 +475,13 @@ export default function MarketplacePage() {
                           <div className="text-sm text-muted-foreground mb-3">
                             {(listing.token.supply / 10000).toFixed(2)} tokens
                           </div>
-                          <Button size="sm" className="gap-2" disabled={listing.status !== "active" || !isConnected}>
-                            <ShoppingCart className="h-4 w-4" />
-                            {listing.status === "active" ? "Buy" : "Sold"}
-                          </Button>
+                          <TokenPurchaseDialog 
+                            listing={listing}
+                            onPurchaseComplete={() => {
+                              // Refresh marketplace data after purchase
+                              loadMarketplaceData()
+                            }}
+                          />
                         </div>
                       </div>
                     </CardContent>
